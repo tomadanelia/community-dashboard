@@ -23,13 +23,12 @@ namespace Backend.Services
         }
             throw new Exception("Event not found");
         }
-        public void AddEvent(Event newevent)
+        public Event AddEvent(Event newevent)
         {
-            if (db.Find(e => e.Id == newevent.Id) != null)
-            {
-                throw new Exception("Event with the same ID already exists");
-            }
+            int newId = db.Count > 0 ? db.Max(e => e.Id) + 1 : 1;
+            newevent.Id = newId;
             db.Add(newevent);
+            return newevent;
         }
         public void DeleteEvent(int id)
         {
@@ -44,7 +43,7 @@ namespace Backend.Services
             }
 
         }
-        public void ModifyEvent(int id,Event newevent)
+        public Event ModifyEvent(int id,Event newevent)
         {
             var oldeventindex = db.FindIndex(e => e.Id == id);
             if (oldeventindex == -1)
@@ -52,7 +51,10 @@ namespace Backend.Services
                 throw new Exception("no such event in db");
             }
             db[oldeventindex] = newevent;
+            return newevent;
+
         }
+
 
 
 
