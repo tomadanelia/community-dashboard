@@ -24,6 +24,7 @@ namespace backend.Controllers
         {
             try
             {
+               
                 Event ev = _eventService.GetEventById(id);
                 return Ok(ev);
 

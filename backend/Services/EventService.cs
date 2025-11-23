@@ -10,18 +10,13 @@ namespace Backend.Services
     new Event { Id = 3, Name = "graduation", Description = "notinvited", Date = DateTime.Now.AddDays(2) }
 };
 
-        public List<Event> GetAllEvents()
-        {
-            return this.db;
-        }
-        public Event GetEventById(int id)
+        public List<Event> GetAllEvents()=>db;
+        
+        public Event? GetEventById(int id)
         {
             var ev= db.Find(e => e.Id == id);
-            if (ev!=null){
+            
             return ev;
-
-        }
-            throw new Exception("Event not found");
         }
         public Event AddEvent(Event newevent)
         {
@@ -30,26 +25,28 @@ namespace Backend.Services
             db.Add(newevent);
             return newevent;
         }
-        public void DeleteEvent(int id)
+        public bool DeleteEvent(int id)
         {
             var ev = db.Find(e => e.Id == id);
             if (ev != null)
             {
                 db.Remove(ev);
+                return true;
             }
             else
             {
-                throw new Exception ("Event was never there dumbass");
+                return false;
             }
 
         }
-        public Event ModifyEvent(int id,Event newevent)
+        public Event? ModifyEvent(int id,Event newevent)
         {
             var oldeventindex = db.FindIndex(e => e.Id == id);
             if (oldeventindex == -1)
             {
-                throw new Exception("no such event in db");
+                return null;
             }
+            newevent.Id = id;
             db[oldeventindex] = newevent;
             return newevent;
 
