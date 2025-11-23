@@ -1,6 +1,7 @@
 ﻿using Backend.Models;
-using Microsoft.AspNetCore.Mvc;
 using Backend.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 namespace backend.Controllers
 {
     [ApiController]
@@ -14,60 +15,64 @@ namespace backend.Controllers
         }
 
         [HttpGet]
-        public List<Event> GetAllEvents()
+        public ActionResult<List<Event>> GetAllEvents()
         {
             List<Event> db = _eventService.GetAllEvents();
-            return db;
+            return Ok(db);
         }
         [HttpGet("{id}")]
         public ActionResult<Event> GetEventById(int id)
         {
-            try
+            if (!ModelState.IsValid)
             {
+                return BadRequest(ModelState);
+            }
                
-                Event ev = _eventService.GetEventById(id);
-                return Ok(ev);
+                Event? ev = _eventService.GetEventById(id);
+            if (ev == null)
+            {
+                return NotFound(new {message= "event not found"});
 
             }
-            catch (Exception ex) {
-                return NotFound(ex.Message);
-
-            }
+            return Ok(ev);
 
         }
         [HttpPost]
         public ActionResult<Event> AddEvent(Event ev)
         {
-            return _eventService.AddEvent(ev);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var created= _eventService.AddEvent(ev);
+            return CreatedAtAction(nameof(GetEventById), new { id = created.Id }, created);
+
 
 
         }
         [HttpDelete("{id}")]
         public IActionResult DeleteEvent(int id)
         {
-            try
+            
+                var deleteFlag=_eventService.DeleteEvent(id);
+            if (deleteFlag)
             {
-                _eventService.DeleteEvent(id);
-                return Ok();
-
+                return NoContent();
             }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return NotFound(new { message = "event to delete not founf" });
+                
         }
         [HttpPut("{id}")]
         public ActionResult<Event> ModifyEvent(int id,Event ev)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                return _eventService.ModifyEvent(id, ev);
+                return BadRequest(ModelState);
             }
-            catch(Exception ex)
-            {
-                return NotFound(ex.Message);
+                var modified= _eventService.ModifyEvent(id, ev);
+            if (modified == null) return NotFound(new { message = "not found event to modify" });
+            return CreatedAtAction(nameof(GetEventById), new { id = modified.Id }, modified);
 
-            }
 
         }
     }
